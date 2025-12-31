@@ -1,11 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from .schemas import SendCodeSchema
+from .schemas import SendCodeSchema, CheckCodeSchema
 from fastapi import HTTPException
-from random import randint
+from worker import send_code
 from db import (
     get_recent_send_codes,
-    create_sms_code
+    create_sms_code,
+    get_last_send_code
 )
+import random
 
 class Service:
     def __init__(self):
@@ -13,7 +15,7 @@ class Service:
 
 
     def _generate_code(self):
-        return randint(1000, 9999)
+        return random.randint(1000, 9999)
     
 
     async def send(self, schema: SendCodeSchema, db: AsyncSession):
@@ -32,7 +34,18 @@ class Service:
             service=schema.service,
             code=code
         )
-
-        # send code on email login here
+        send_code.delay(schema.email, code)
 
         return { "message": "Code sent" }
+    
+
+    async def check_code(self, schema: CheckCodeSchema, db: AsyncSession):
+        last_code = await get_last_send_code(
+            db,
+            email=schema.email,
+            service=schema.service
+        )
+        if not last_code or last_code.code != schema.code:
+            raise HTTPException(400, detail="Invalid code")
+        
+        return { "detail": "Correct code" }

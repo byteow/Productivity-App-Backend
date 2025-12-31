@@ -3,6 +3,7 @@ from .service import Service
 from db import get_session
 from services import secure_access
 from .schemas import LoginSchema, SignUpSchema
+from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/auth")
@@ -19,3 +20,7 @@ async def signup(schema: SignUpSchema, db: AsyncSession=Depends(get_session)):
 @router.get("/auth_state")
 async def auth_state(user_id = Depends(secure_access)):
     return await service.auth_state(user_id)
+
+@router.get("/user_exists")
+async def user_exists(email: EmailStr, db: AsyncSession=Depends(get_session)):
+    return await service.user_exists(email, db)

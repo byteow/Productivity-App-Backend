@@ -1,6 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from db import Service
 
 class SendCodeSchema(BaseModel):
-    email: str
+    email: EmailStr
     service: Service
+
+class CheckCodeSchema(BaseModel):
+    email: EmailStr
+    service: Service
+    code: int

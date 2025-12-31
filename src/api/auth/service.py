@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from .schemas import LoginSchema, SignUpSchema
+from pydantic import EmailStr
 from hashlib import md5
 from fastapi import HTTPException
 from db import (
@@ -45,6 +46,10 @@ class Service:
 
         password_hash = md5(schema.password.encode()).hexdigest()
 
+        last_code = await get_last_send_code(db, email=schema.email, service=CodeService.SIGNUP)
+        if not last_code or last_code.code != schema.code:
+            raise HTTPException(status_code=400, detail="Invalid code")
+
         user = await create_user(
             db,
             name=schema.name,
@@ -53,10 +58,6 @@ class Service:
             age=schema.age,
             gender=schema.gender
         )
-
-        last_code = await get_last_send_code(db, email=schema.email, service=CodeService.SIGNUP)
-        if not last_code or last_code.code != schema.code:
-            raise HTTPException(status_code=400, detail="Invalid code")
 
         access_token = self.jwt.create_access_token({ "user_id": user.id })
         refresh_token = self.jwt.create_refresh_token()
@@ -68,5 +69,12 @@ class Service:
         }
     
 
-    async def auth_state(user_id: int):
+    async def auth_state(self, user_id: int):
         return { "user_id": user_id }
+    
+
+    async def user_exists(self, email: EmailStr, db: AsyncSession):
+        user = await get_user_by_email(db, email=email)
+        if not user:
+            raise HTTPException(404, detail="User not found")
+        return { "message": "User exists" }
