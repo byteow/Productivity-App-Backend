@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Date
 from datetime import datetime, timezone
 from .enums import Gender, Service
 
@@ -16,7 +16,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    age = Column(Integer, nullable=False)
+    birthday = Column(Date, nullable=True)
     gender = Column(GenderType, nullable=False)
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)

@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import date
+from typing import Optional
 from db import User, Gender
 
 async def create_user(
@@ -8,14 +10,14 @@ async def create_user(
     name: str,
     email: str,
     password: str,
-    age: int,
+    birthday: Optional[date],
     gender: Gender
 ) -> User:
     user = User(
         name=name,
         email=email,
         password=password,
-        age=age,
+        birthday=birthday,
         gender=gender
     )
     session.add(user)

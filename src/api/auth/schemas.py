@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
+from datetime import date
 from db import Gender
 
 class LoginSchema(BaseModel):
@@ -10,7 +12,7 @@ class SignUpSchema(BaseModel):
     name: str
     email: EmailStr
     password: str
-    age: int = Field(ge=14, le=100)
+    birthday: Optional[date]
     gender: Gender
     code: int
 

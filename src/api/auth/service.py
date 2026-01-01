@@ -55,7 +55,7 @@ class Service:
             name=schema.name,
             email=schema.email,
             password=password_hash,
-            age=schema.age,
+            birthday=schema.birthday,
             gender=schema.gender
         )
 
