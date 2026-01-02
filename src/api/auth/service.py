@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from .schemas import LoginSchema, SignUpSchema
+from .schemas import LoginSchema, SignUpSchema, RefreshSchema
 from pydantic import EmailStr
 from hashlib import md5
 from fastapi import HTTPException
@@ -15,6 +15,14 @@ class Service:
     def __init__(self):
         self.jwt = JWTSecurity()
 
+
+    def _generate_token_pair(self, user_id: int):
+        payload = { "user_id": user_id }
+        return {
+            "access_token": self.jwt.create_access_token(payload),
+            "refresh_token": self.jwt.create_refresh_token(payload)
+        }
+
     
     async def login(self, schema: LoginSchema, db: AsyncSession):
         user = await get_user_by_email(db, email=schema.email)
@@ -29,12 +37,8 @@ class Service:
         if not last_code or last_code.code != schema.code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
-        access_token = self.jwt.create_access_token({ "user_id": user.id })
-        refresh_token = self.jwt.create_refresh_token()
-
         return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            **self._generate_token_pair(user.id),
             "user_id": user.id
         }
     
@@ -59,12 +63,8 @@ class Service:
             gender=schema.gender
         )
 
-        access_token = self.jwt.create_access_token({ "user_id": user.id })
-        refresh_token = self.jwt.create_refresh_token()
-
         return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            **self._generate_token_pair(user.id),
             "user_id": user.id
         }
     
@@ -78,3 +78,10 @@ class Service:
         if not user:
             raise HTTPException(404, detail="User not found")
         return { "message": "User exists" }
+    
+
+    async def refresh(self, schema: RefreshSchema):
+        data = self.jwt.verify_refresh_token(schema.refresh_token)
+        if not data:
+            raise HTTPException(400, detail="Invalid refresh token")
+        return self._generate_token_pair(data["user_id"])

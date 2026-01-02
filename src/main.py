@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import auth_router, sms_router
+from api import auth_router, sms_router, profile_router
 from services import ErrorHandlingMiddleware
 from config import CORS_ORIGINS
 
@@ -15,5 +15,6 @@ app.add_middleware(
 
 app.add_middleware(ErrorHandlingMiddleware)
 
-app.include_router(auth_router)
-app.include_router(sms_router)
+app.include_router(auth_router, tags=["Authorization"])
+app.include_router(sms_router, tags=["Codes"])
+app.include_router(profile_router, tags=["Profile"])

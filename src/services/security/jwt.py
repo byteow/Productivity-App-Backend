@@ -50,12 +50,13 @@ class JWTSecurity:
         )
     
 
-    def create_refresh_token(self):
+    def create_refresh_token(self, data: dict = dict()):
         return self._create_token(
             self.REFRESH_TOKEN_EXP, 
             self.REFRESH_SECRET, 
-            "refresh", 
-            expires_delta=timedelta(days=self.REFRESH_TOKEN_EXP)
+            "refresh",
+            data,
+            timedelta(days=self.REFRESH_TOKEN_EXP)
         )
     
 

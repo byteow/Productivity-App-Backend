@@ -12,9 +12,12 @@ class SignUpSchema(BaseModel):
     name: str
     email: EmailStr
     password: str
-    birthday: Optional[date]
+    birthday: Optional[date] = None
     gender: Gender
     code: int
 
 class UserExistsSchema(BaseModel):
     email: EmailStr
+
+class RefreshSchema(BaseModel):
+    refresh_token: str
