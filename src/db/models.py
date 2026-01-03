@@ -1,13 +1,12 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Enum, Date
 from datetime import datetime, timezone
-from .enums import Gender, Service
+from .enums import Gender
 
 Base = declarative_base()
 timestamp = lambda: datetime.now(timezone.utc)
 
 GenderType = Enum(Gender, name="gender")
-SmsCodesService = Enum(Service, name="service")
 
 class User(Base):
     __tablename__ = "users"
@@ -20,12 +19,3 @@ class User(Base):
     gender = Column(GenderType, nullable=False)
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
-
-class SmsCodes(Base):
-    __tablename__ = "sms_codes"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String(255))
-    code = Column(Integer)
-    service = Column(SmsCodesService, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=timestamp)

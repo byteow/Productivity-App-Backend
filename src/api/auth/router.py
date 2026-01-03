@@ -28,3 +28,7 @@ async def auth_state(user_id=Depends(secure_access)):
 @router.get("/user_exists")
 async def user_exists(email: EmailStr, db: AsyncSession=Depends(get_session)):
     return await service.user_exists(email, db)
+
+@router.post("/recovery_password")
+async def recovery_password(schema: LoginSchema, db: AsyncSession=Depends(get_session)):
+    return await service.recovery_passwowrd(schema, db)

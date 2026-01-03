@@ -6,14 +6,15 @@ from fastapi import HTTPException
 from db import (
     get_user_by_email,
     create_user,
-    get_last_send_code,
+    update_user,
     Service as CodeService
 )
-from services import JWTSecurity
+from services import JWTSecurity, get_otp_manager
 
 class Service:
     def __init__(self):
         self.jwt = JWTSecurity()
+        self.otp_manager = get_otp_manager()
 
 
     def _generate_token_pair(self, user_id: int):
@@ -33,8 +34,8 @@ class Service:
         if user.password != password_hash:
             raise HTTPException(status_code=404, detail="User not found")
 
-        last_code = await get_last_send_code(db, email=schema.email, service=CodeService.LOGIN)
-        if not last_code or last_code.code != schema.code:
+        is_valid_code = await self.otp_manager.verify_otp(schema.email, schema.code, CodeService.LOGIN)
+        if not is_valid_code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
         return {
@@ -50,8 +51,8 @@ class Service:
 
         password_hash = md5(schema.password.encode()).hexdigest()
 
-        last_code = await get_last_send_code(db, email=schema.email, service=CodeService.SIGNUP)
-        if not last_code or last_code.code != schema.code:
+        is_valid_code = await self.otp_manager.verify_otp(schema.email, schema.code, CodeService.SIGNUP)
+        if not is_valid_code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
         user = await create_user(
@@ -85,3 +86,18 @@ class Service:
         if not data:
             raise HTTPException(400, detail="Invalid refresh token")
         return self._generate_token_pair(data["user_id"])
+    
+
+    async def recovery_passwowrd(self, schema: LoginSchema, db: AsyncSession):
+        user = await get_user_by_email(db, email=schema.email)
+        if not user:
+            raise HTTPException(404, detail="User not found")
+        
+        is_valid_code = await self.otp_manager.verify_otp(schema.email, schema.code, CodeService.RECOVERY)
+        if not is_valid_code:
+            raise HTTPException(status_code=400, detail="Invalid code")
+
+        new_password = md5(schema.password.encode()).hexdigest()
+        await update_user(db, id=user.id, password=new_password)
+
+        return { "message": "Password successfully updated" }

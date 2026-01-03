@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from datetime import date
 from typing import Optional
 from db import User, Gender
@@ -42,3 +42,15 @@ async def get_user_by_id(
     query = select(User).where(User.id == id)
     result = await session.execute(query)
     return result.scalar_one_or_none()
+
+async def update_user(
+    session: AsyncSession,
+    *,
+    id: int,
+    **kwargs,
+) -> None:
+    query = update(User)\
+        .where(User.id == id)\
+        .values(**kwargs)
+    await session.execute(query)
+    await session.commit()

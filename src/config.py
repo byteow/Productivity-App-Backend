@@ -13,6 +13,9 @@ JWT_REFRESH_SECRET = os.environ.get("JWT_REFRESH_SECRET")
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
 
+# Redis
+REDIS_URL = os.environ.get("REDIS_URI")
+
 # Emails
 EMAIL_LOGIN = os.environ.get("EMAIL_LOGIN")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")

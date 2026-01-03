@@ -7,3 +7,4 @@ class Gender(str, Enum):
 class Service(str, Enum):
     LOGIN = "LOGIN",
     SIGNUP = "SIGNUP"
+    RECOVERY = "RECOVERY"
