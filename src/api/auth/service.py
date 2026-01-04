@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from .schemas import LoginSchema, SignUpSchema, RefreshSchema
 from pydantic import EmailStr
-from hashlib import md5
 from fastapi import HTTPException
 from db import (
     get_user_by_email,
@@ -9,7 +8,7 @@ from db import (
     update_user,
     Service as CodeService
 )
-from services import JWTSecurity, get_otp_manager
+from services import JWTSecurity, get_otp_manager, hash_password
 
 class Service:
     def __init__(self):
@@ -30,7 +29,7 @@ class Service:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        password_hash = md5(schema.password.encode()).hexdigest()
+        password_hash = hash_password(schema.password)
         if user.password != password_hash:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -49,7 +48,7 @@ class Service:
         if user:
             raise HTTPException(status_code=400, detail="User already exists")
 
-        password_hash = md5(schema.password.encode()).hexdigest()
+        password_hash = hash_password(schema.password)
 
         is_valid_code = await self.otp_manager.verify_otp(schema.email, schema.code, CodeService.SIGNUP)
         if not is_valid_code:
@@ -97,7 +96,7 @@ class Service:
         if not is_valid_code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
-        new_password = md5(schema.password.encode()).hexdigest()
+        new_password = hash_password(schema.password)
         await update_user(db, id=user.id, password=new_password)
 
-        return { "message": "Password successfully updated" }
+        return { "message": "Password successfully recovered" }

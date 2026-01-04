@@ -5,13 +5,13 @@ from db import Gender
 
 class LoginSchema(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=6)
     code: int
 
 class SignUpSchema(BaseModel):
-    name: str
+    name: str = Field(min_length=6, max_length=32)
     email: EmailStr
-    password: str
+    password: str = Field(min_length=6)
     birthday: Optional[date] = None
     gender: Gender
     code: int
