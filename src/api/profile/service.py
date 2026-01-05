@@ -29,13 +29,13 @@ class Service:
 
     async def update_meta_info(self, schema: UpdateMetaInfoSchema, user_id: int, db: AsyncSession):
         data_for_update = {}
+        data_for_update["birthday"] = schema.birthday
+
         if schema.name:
             data_for_update["name"] = schema.name
         if schema.gender:
             data_for_update["gender"] = schema.gender
-        if schema.birthday:
-            data_for_update["birthday"] = schema.birthday
-
+            
         await update_user(db, id=user_id, **data_for_update)
 
         return { "message": "Profile successfully updated" }
