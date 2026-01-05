@@ -6,6 +6,7 @@ from db import (
     get_user_by_email,
     create_user,
     update_user,
+    create_login_session,
     Service as CodeService
 )
 from services import JWTSecurity, get_otp_manager, hash_password
@@ -23,8 +24,19 @@ class Service:
             "refresh_token": self.jwt.create_refresh_token(payload)
         }
 
+
+    async def _save_login_session(self, db: AsyncSession, user_id: int, dev_info: dict):
+        await create_login_session(
+            db,
+            user_id=user_id,
+            ip=dev_info.get("ip"),
+            os=dev_info.get("os"),
+            client_app=dev_info.get("client_app"),
+            is_mobile_device=dev_info.get("is_mobile_device")
+        )
+
     
-    async def login(self, schema: LoginSchema, db: AsyncSession):
+    async def login(self, schema: LoginSchema, db: AsyncSession, dev_info: dict):
         user = await get_user_by_email(db, email=schema.email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -37,13 +49,15 @@ class Service:
         if not is_valid_code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
+        await self._save_login_session(db, user.id, dev_info)
+
         return {
             **self._generate_token_pair(user.id),
             "user_id": user.id
         }
     
 
-    async def signup(self, schema: SignUpSchema, db: AsyncSession):
+    async def signup(self, schema: SignUpSchema, db: AsyncSession, dev_info: dict):
         user = await get_user_by_email(db, email=schema.email)
         if user:
             raise HTTPException(status_code=400, detail="User already exists")
@@ -62,6 +76,8 @@ class Service:
             birthday=schema.birthday,
             gender=schema.gender
         )
+
+        await self._save_login_session(db, user.id, dev_info)
 
         return {
             **self._generate_token_pair(user.id),

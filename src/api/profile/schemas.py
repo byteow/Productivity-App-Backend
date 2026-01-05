@@ -4,7 +4,7 @@ from db import Gender
 from datetime import date
 
 class UpdateMetaInfoSchema(BaseModel):
-    name: Optional[str] = Field(min_length=3, max_length=32)
+    name: Optional[str] = Field(None, min_length=3, max_length=32)
     gender: Optional[Gender] = None
     birthday: Optional[date] = None    
 
