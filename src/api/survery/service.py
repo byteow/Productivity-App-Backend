@@ -1,0 +1,55 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from db import (
+    SurveyStatus,
+    create_survey,
+    get_today_survey,
+    update_today_survey_answers
+)
+from fastapi import HTTPException
+from .schemas import UpdateAnswersSchema
+
+class Service:
+    def __init__(self):
+        ...
+
+
+    async def generate_survey(self, user_id: int, db: AsyncSession):
+        today_survey = await get_today_survey(db, user_id=user_id)
+        if today_survey:
+            return {
+                "survey_id": today_survey.id,
+                "status": today_survey.status,
+                "schema": today_survey.schema
+            }
+    
+        survey = await create_survey(
+            db,
+            user_id=user_id,
+            status=SurveyStatus.GENERATING,
+            schema=None
+        )
+
+        # TODO: pass task to celery
+
+        return {
+            "survey_id": survey.id,
+            "status": survey.status,
+            "schema": survey.schema
+        }
+    
+
+    async def update_answers(
+        self, 
+        schema: UpdateAnswersSchema,
+        user_id: int,
+        db: AsyncSession
+    ):
+        rowcount = await update_today_survey_answers(
+            db,
+            user_id=user_id,
+            schema=schema.answers
+        )
+        if rowcount == 0:
+            raise HTTPException(400, detail="Today's survey not exists or in generating state")
+        
+        return { "message": "Survey answers successfully updated" }

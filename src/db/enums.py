@@ -1,11 +1,16 @@
 from enum import Enum
 
 class Gender(str, Enum):
-    MALE = "MALE",
+    MALE = "MALE"
     FEMALE = "FEMALE"
 
 class Service(str, Enum):
-    LOGIN = "LOGIN",
+    LOGIN = "LOGIN"
     SIGNUP = "SIGNUP"
-    RECOVERY = "RECOVERY",
+    RECOVERY = "RECOVERY"
     UPDATE = "UPDATE"
+
+class SurveyStatus(str, Enum):
+    GENERATING = "GENERATING"
+    PENDING = "PENDING"
+    COMPLTETED = "COMPLETED"

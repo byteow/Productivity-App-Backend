@@ -20,6 +20,7 @@ REDIS_URL = os.environ.get("REDIS_URI")
 EMAIL_LOGIN = os.environ.get("EMAIL_LOGIN")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_SERVER = os.environ.get("EMAIL_SERVER")
+EMAIL_SERVER_PORT = int(os.environ.get("EMAIL_SERVER_PORT"))
 
 # CORS
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS").split(",")
