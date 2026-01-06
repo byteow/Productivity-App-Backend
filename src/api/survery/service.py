@@ -31,7 +31,7 @@ class Service:
             schema=None
         )
 
-        generate_survey.delay(survey.id)
+        generate_survey.delay(user_id, survey.id)
 
         return {
             "survey_id": survey.id,

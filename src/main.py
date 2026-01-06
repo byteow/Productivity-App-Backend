@@ -4,7 +4,8 @@ from api import (
     auth_router, 
     sms_router, 
     profile_router,
-    survey_router
+    survey_router,
+    ws_router
 )
 from services import ErrorHandlingMiddleware
 from config import CORS_ORIGINS
@@ -24,3 +25,4 @@ app.include_router(auth_router, tags=["Authorization"])
 app.include_router(sms_router, tags=["Codes"])
 app.include_router(profile_router, tags=["Profile"])
 app.include_router(survey_router, tags=["Survey"])
+app.include_router(ws_router, tags=["WebSocket"])

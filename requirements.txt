@@ -11,3 +11,4 @@ celery
 redis
 pydantic[email]
 user-agents
+websockets
