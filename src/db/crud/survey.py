@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, and_, cast, Date
+from sqlalchemy import select, update, and_, cast, Date, func
 from db import SurveyStatus, Survey, SurveyAnswers
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional
 
 async def create_survey(
@@ -35,7 +35,7 @@ async def get_today_survey(
         .where(
             and_(
                 Survey.user_id == user_id,
-                cast(Survey.created_at, Date) == date.today()
+                Survey.created_at > (func.now() - timedelta(hours=24))
             )
         )
     result = await session.execute(query)
@@ -54,6 +54,24 @@ async def update_survey(
     await session.execute(query)
     await session.commit()
 
+async def update_today_survey(
+    session: AsyncSession,
+    *,
+    user_id: int,
+    **kwargs
+) -> None:
+    query = update(Survey)\
+        .where(
+            and_(
+                Survey.user_id == user_id,
+                Survey.created_at > (func.now() - timedelta(hours=24))
+            )
+        )\
+        .values(**kwargs)
+    
+    await session.execute(query)
+    await session.commit()
+
 async def update_today_survey_answers(
     session: AsyncSession,
     *,
@@ -63,11 +81,10 @@ async def update_today_survey_answers(
     query = update(SurveyAnswers)\
         .where(
             and_(
-                SurveyAnswers.survey.user_id == user_id,
-                and_(
-                    cast(SurveyAnswers.survey.created_at, Date) == date.today(),
-                    SurveyAnswers.survey.status == SurveyStatus.PENDING
-                )
+                SurveyAnswers.survey_id == Survey.id,
+                Survey.user_id == user_id,
+                Survey.created_at > (func.now() - timedelta(hours=24)),
+                Survey.status == SurveyStatus.PENDING
             )
         )\
         .values(**kwargs)

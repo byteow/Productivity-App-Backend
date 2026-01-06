@@ -3,10 +3,12 @@ from db import (
     SurveyStatus,
     create_survey,
     get_today_survey,
-    update_today_survey_answers
+    update_today_survey_answers,
+    update_today_survey
 )
 from fastapi import HTTPException
 from .schemas import UpdateAnswersSchema
+from worker import generate_survey
 
 class Service:
     def __init__(self):
@@ -29,7 +31,7 @@ class Service:
             schema=None
         )
 
-        # TODO: pass task to celery
+        generate_survey.delay(survey.id)
 
         return {
             "survey_id": survey.id,
@@ -52,4 +54,10 @@ class Service:
         if rowcount == 0:
             raise HTTPException(400, detail="Today's survey not exists or in generating state")
         
+        await update_today_survey(
+            db,
+            user_id=user_id,
+            status=SurveyStatus.COMPLTETED
+        )
+
         return { "message": "Survey answers successfully updated" }
