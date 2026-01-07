@@ -9,7 +9,7 @@ class LoginSchema(BaseModel):
     code: int
 
 class SignUpSchema(BaseModel):
-    name: str = Field(min_length=6, max_length=32)
+    name: str = Field(min_length=3, max_length=32)
     email: EmailStr
     password: str = Field(min_length=6)
     birthday: Optional[date] = None

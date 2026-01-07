@@ -25,11 +25,10 @@ worker.conf.broker_url = CELERY_BROKER_URL
 worker.conf.result_backend = CELERY_RESULT_BACKEND
 
 questions = [
-    {"question": "Сколько часов сна прошлой ночью?", "answer_type": "numeric"},
+    {"question": "Сколько часов вы спали прошлой ночью?", "answer_type": "numeric"},
     {"question": "Как вы оцениваете свою продуктивность за неделю?", "answer_type": "scale-1-5"},
     {"question": "Какая личная активность дала наибольшую пользу вашему самочувствию?", "answer_type": "text"},
-    {"question": "Сколько задач вы закрыли на прошлой неделе?", "answer_type": "numeric", "order": 4},
-    {"question": "Насколько вы восстановились эмоционально и физически?", "answer_type": "scale-1-5"},
+    {"question": "Сколько задач вы закрыли на прошлой неделе?", "answer_type": "numeric"},
     {"question": "Вы планируете новые цели на следующую неделю?", "answer_type": "single_choice"}
 ]
 

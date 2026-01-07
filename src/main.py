@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from api import (
     auth_router, 
@@ -21,8 +21,12 @@ app.add_middleware(
 
 app.add_middleware(ErrorHandlingMiddleware)
 
-app.include_router(auth_router, tags=["Authorization"])
-app.include_router(sms_router, tags=["Codes"])
-app.include_router(profile_router, tags=["Profile"])
-app.include_router(survey_router, tags=["Survey"])
-app.include_router(ws_router, tags=["WebSocket"])
+api_router = APIRouter(prefix="/api")
+
+api_router.include_router(auth_router, tags=["Authorization"])
+api_router.include_router(sms_router, tags=["Codes"])
+api_router.include_router(profile_router, tags=["Profile"])
+api_router.include_router(survey_router, tags=["Survey"])
+api_router.include_router(ws_router, tags=["WebSocket"])
+
+app.include_router(api_router)

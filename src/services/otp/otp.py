@@ -10,7 +10,7 @@ def get_otp_manager():
     return OTPManager(client)
 
 class OTPManager:
-    def __init__(self, client: Redis, otp_exp: int = 300):
+    def __init__(self, client: Redis, otp_exp: int=300):
         self.redis = client
         self.otp_exp = otp_exp
 

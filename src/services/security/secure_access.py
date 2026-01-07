@@ -16,7 +16,7 @@ async def secure_access(request: Request):
     except IndexError:
         raise HTTPException(401, detail="Unauthorized")
     
-async def ws_secure_access(ws: WebSocket, access_token: str = Query(None)):
+async def ws_secure_access(ws: WebSocket, access_token: str=Query(None)):
     data = jwt.verify_access_token(access_token)
     if not data:
         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
