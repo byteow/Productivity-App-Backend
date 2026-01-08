@@ -14,3 +14,12 @@ class SurveyStatus(str, Enum):
     GENERATING = "GENERATING"
     PENDING = "PENDING"
     COMPLTETED = "COMPLETED"
+
+class TaskStatus(str, Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+
+class TaskPriority(str, Enum):
+    LOW = "LOW",
+    MEDIUM = "MEDIUM",
+    HIGH = "HIGH"

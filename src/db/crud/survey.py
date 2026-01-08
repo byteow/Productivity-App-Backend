@@ -31,12 +31,14 @@ async def get_today_survey(
     *,
     user_id: int
 ) -> Survey | None:
+    threshold = func.now() - timedelta(hours=12)
+    today_date = datetime.now().date()
     query = select(Survey)\
         .where(
             and_(
                 Survey.user_id == user_id,
-                Survey.created_at > (func.now() - timedelta(hours=12)),
-                cast(Survey.created_at, Date) == datetime.now().date()
+                Survey.created_at > threshold,
+                cast(Survey.created_at, Date) == today_date
             )
         )
     result = await session.execute(query)
@@ -61,12 +63,14 @@ async def update_today_survey(
     user_id: int,
     **kwargs
 ) -> None:
+    threshold = func.now() - timedelta(hours=12)
+    today_date = datetime.now().date()
     query = update(Survey)\
         .where(
             and_(
                 Survey.user_id == user_id,
-                Survey.created_at > (func.now() - timedelta(hours=12)),
-                cast(Survey.created_at, Date) == datetime.now().date()
+                Survey.created_at > threshold,
+                cast(Survey.created_at, Date) == today_date
             )
         )\
         .values(**kwargs)
@@ -80,13 +84,15 @@ async def update_today_survey_answers(
     user_id: int,
     **kwargs
 ) -> int:
+    threshold = func.now() - timedelta(hours=12)
+    today_date = datetime.now().date()
     query = update(SurveyAnswers)\
         .where(
             and_(
                 SurveyAnswers.survey_id == Survey.id,
                 Survey.user_id == user_id,
-                Survey.created_at > (func.now() - timedelta(hours=12)),
-                cast(Survey.created_at, Date) == datetime.now().date(),
+                Survey.created_at > threshold,
+                cast(Survey.created_at, Date) == today_date,
                 Survey.status == SurveyStatus.PENDING
             )
         )\
