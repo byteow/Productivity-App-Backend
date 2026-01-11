@@ -34,6 +34,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
 
+    streak = relationship("Streak", back_populates="user", uselist=False)
+
 class LoginSession(Base):
     __tablename__ = "login_sessions"
 
@@ -81,3 +83,16 @@ class Task(Base):
     is_pinned = Column(Boolean, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=timestamp, index=True)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
+
+class Streak(Base):
+    __tablename__ = "streaks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
+    streak_days = Column(Integer, nullable=False)
+    is_active = Column(Boolean, nullable=False)
+    penalty_days = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=timestamp)
+    updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
+
+    user = relationship("User", back_populates="streak")
