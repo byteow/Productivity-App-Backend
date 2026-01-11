@@ -9,12 +9,14 @@ async def create_streak(
     streak_days: int,
     is_active: bool,
     penalty_days: int,
+    day_tip: str
 ) -> Streak:
     streak = Streak(
         user_id=user_id,
         streak_days=streak_days,
         is_active=is_active,
-        penalty_days=penalty_days
+        penalty_days=penalty_days,
+        day_tip=day_tip
     )
     session.add(streak)
     await session.commit()

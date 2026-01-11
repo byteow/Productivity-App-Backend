@@ -2,6 +2,7 @@ from pydantic import EmailStr, BaseModel, Field
 from typing import Optional
 from db import Gender
 from datetime import date
+from .enums import Language
 
 class UpdateMetaInfoSchema(BaseModel):
     name: Optional[str] = Field(None, min_length=3, max_length=32)
@@ -15,3 +16,6 @@ class UpdateEmailSchema(BaseModel):
 class UpdatePasswordSchema(BaseModel):
     old_password: str = Field(min_length=6)
     new_password: str = Field(min_length=6)
+
+class GetMyProfileSchema(BaseModel):
+    lang: Optional[Language] = Language.EN

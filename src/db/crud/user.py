@@ -21,11 +21,12 @@ async def create_user(
         birthday=birthday,
         gender=gender
     )
-    user.streak = Streak(
+    '''user.streak = Streak(
         streak_days=1, 
         penalty_days=0, 
-        is_active=True
-    )
+        is_active=True,
+        day_tip=""
+    )'''
     session.add(user)
     await session.commit()
     await session.refresh(user)

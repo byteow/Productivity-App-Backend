@@ -92,6 +92,7 @@ class Streak(Base):
     streak_days = Column(Integer, nullable=False)
     is_active = Column(Boolean, nullable=False)
     penalty_days = Column(Integer, nullable=False)
+    day_tip = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
 
