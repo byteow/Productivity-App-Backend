@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends
 from .service import Service
 from db import get_session
 from services import secure_access, device_info
-from .schemas import LoginSchema, SignUpSchema, RefreshSchema
+from .schemas import (
+    LoginSchema, 
+    SignUpSchema, 
+    RefreshSchema,
+    RecoveryPasswordSchema
+)
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,5 +43,5 @@ async def user_exists(email: EmailStr, db: AsyncSession=Depends(get_session)):
     return await service.user_exists(email, db)
 
 @router.post("/recovery_password")
-async def recovery_password(schema: LoginSchema, db: AsyncSession=Depends(get_session)):
+async def recovery_password(schema: RecoveryPasswordSchema, db: AsyncSession=Depends(get_session)):
     return await service.recovery_passwowrd(schema, db)

@@ -1,5 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from .schemas import LoginSchema, SignUpSchema, RefreshSchema
+from .schemas import (
+    LoginSchema, 
+    SignUpSchema, 
+    RefreshSchema, 
+    RecoveryPasswordSchema
+)
 from pydantic import EmailStr
 from fastapi import HTTPException
 from db import (
@@ -103,7 +108,7 @@ class Service:
         return self._generate_token_pair(data["user_id"])
     
 
-    async def recovery_passwowrd(self, schema: LoginSchema, db: AsyncSession):
+    async def recovery_passwowrd(self, schema: RecoveryPasswordSchema, db: AsyncSession):
         user = await get_user_by_email(db, email=schema.email)
         if not user:
             raise HTTPException(404, detail="User not found")
@@ -112,7 +117,7 @@ class Service:
         if not is_valid_code:
             raise HTTPException(status_code=400, detail="Invalid code")
 
-        new_password = hash_password(schema.password)
+        new_password = hash_password(schema.new_password)
         await update_user(db, id=user.id, password=new_password)
 
         return { "message": "Password successfully recovered" }

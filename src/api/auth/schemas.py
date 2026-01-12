@@ -8,6 +8,11 @@ class LoginSchema(BaseModel):
     password: str = Field(min_length=6)
     code: int
 
+class RecoveryPasswordSchema(BaseModel):
+    email: EmailStr
+    code: int
+    new_password: str = Field(min_length=6)
+
 class SignUpSchema(BaseModel):
     name: str = Field(min_length=3, max_length=32)
     email: EmailStr
