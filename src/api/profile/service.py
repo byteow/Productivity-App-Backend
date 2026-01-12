@@ -4,6 +4,7 @@ from db import (
     get_user_by_id,
     update_user_streak,
     create_streak,
+    get_user_by_email,
     Service as CodeService
 )
 from .schemas import (
@@ -66,7 +67,8 @@ class Service:
             elif not user.streak.is_active and update_date < yesterday:
                 kwargs = { "penalty_days": 0 }
             if kwargs:
-                await update_user_streak(db, user_id=user_id, day_tip=rt(), **kwargs)
+                kwargs["day_tip"] = rt()
+                await update_user_streak(db, user_id=user_id, **kwargs)
                 for key, value in kwargs.items():
                     setattr(user.streak, key, value)
 
@@ -100,6 +102,10 @@ class Service:
     
 
     async def update_email(self, schema: UpdateEmailSchema, user_id: int, db: AsyncSession):
+        user = await get_user_by_email(db, email=schema.email)
+        if user:
+            raise HTTPException(400, detail="User with such email already exists")
+
         is_valid_code = await self.otp_manager.verify_otp(schema.email, schema.code, CodeService.UPDATE)
         if not is_valid_code:
             raise HTTPException(400, detail="Invalid code")
