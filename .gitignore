@@ -27,6 +27,7 @@ wheels/
 # Interpreters
 /venv/
 .env
+.dev-env
 /env/
 /ENV/
 .venv/

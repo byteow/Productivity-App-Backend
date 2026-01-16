@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import os
-load_dotenv()
+
+PRODUCTION = os.environ.get("PRODUCTION")
+load_dotenv(".env" if PRODUCTION else "../.dev-env")
 
 # Database
 PG_URI = os.environ.get("PG_URI")

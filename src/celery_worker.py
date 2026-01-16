@@ -1,10 +1,14 @@
+import asyncio
 from celery import Celery
 from config import (
     CELERY_BROKER_URL, 
     CELERY_RESULT_BACKEND
 )
-import asyncio
-from tasks import async_generate_survey, send_code, async_clean_old_tasks
+from tasks import (
+    async_generate_survey, 
+    send_code, 
+    async_clean_old_tasks
+)
 from datetime import timedelta
 
 worker = Celery(__name__)
@@ -23,10 +27,10 @@ worker.conf.timezone = 'UTC'
 def clean_old_tasks_task():
     return asyncio.run(async_clean_old_tasks())
 
-@worker.task(name="generate_survey")
+@worker.task(name="generate_survey", rate_limit="40/m")
 def generate_survey_task(user_id: int, survey_id: int):
     return asyncio.run(async_generate_survey(user_id, survey_id))
 
-@worker.task(name="send_code")
+@worker.task(name="send_code", rate_limit="20/m")
 def send_code_task(email: str, code: int):
     return send_code(email, code)

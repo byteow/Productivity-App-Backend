@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      context: ./src
+      dockerfile: ../Dockerfile
+    command: uvicorn main:app --reload --host 0.0.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    environment:
+      PRODUCTION: "1"
+    depends_on:
+      - redis
+    networks:
+      - main
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - main
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - main
+
+  celery_worker:
+    build:
+      context: ./src
+      dockerfile: ../Dockerfile
+    command: celery -A celery_worker.worker worker --loglevel=info
+    env_file:
+      - .env
+    environment:
+      PRODUCTION: "1"
+    depends_on:
+      - redis
+    networks:
+      - main
+
+  celery_beat_worker:
+    build:
+      context: ./src
+      dockerfile: ../Dockerfile
+    command: celery -A celery_worker.worker beat --loglevel=info -s /tmp/celerybeat-schedule
+    env_file:
+      - .env
+    environment:
+      PRODUCTION: "1"
+    depends_on:
+      - redis
+    networks:
+      - main
+
+volumes:
+  redis_data:
+networks:
+  main:
