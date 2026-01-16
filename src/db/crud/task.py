@@ -1,5 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, and_, func, delete, or_
+from sqlalchemy import (
+    select, 
+    update, 
+    and_, 
+    func, 
+    delete, 
+    or_, 
+    not_
+)
 from db import TaskPriority, Task, TaskStatus
 from datetime import timedelta
 from typing import List
@@ -85,6 +93,16 @@ async def delete_task(
     await session.commit()
     return result.rowcount
 
+async def delete_tasks_list(
+    session: AsyncSession,
+    *,
+    tasks_ids: List[int]
+) -> int:
+    query = delete(Task).where(Task.id.in_(tasks_ids))
+    result = await session.execute(query)
+    await session.commit()
+    return result.rowcount
+
 async def get_user_tasks_count(
     session: AsyncSession,
     *,
@@ -108,3 +126,18 @@ async def get_user_tasks_count(
         "total": stats["total"],
         "pinned": stats["pinned"]
     }
+
+async def get_old_tasks_ids(
+    session: AsyncSession,
+    *,
+    limit: int=500
+) -> List[int]:
+    threshold = func.now() - timedelta(hours=24)
+    query = select(Task.id)\
+        .where(and_(
+            not_(Task.is_pinned),
+            Task.created_at < threshold
+        ))\
+        .limit(limit)
+    result = await session.execute(query)
+    return result.scalars().all()

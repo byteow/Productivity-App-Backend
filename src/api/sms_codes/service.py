@@ -1,6 +1,6 @@
 from .schemas import SendCodeSchema, CheckCodeSchema
 from fastapi import HTTPException
-from worker import send_code
+from celery_worker import send_code_task
 from services import get_otp_manager
 
 class Service:
@@ -10,7 +10,7 @@ class Service:
 
     async def send(self, schema: SendCodeSchema):
         code = await self.otp_manager.save_otp(schema.email, schema.service)
-        send_code.delay(schema.email, code)
+        send_code_task.delay(schema.email, code)
         return { "message": "Code sent" }
     
 

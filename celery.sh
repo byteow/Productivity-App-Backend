@@ -1,2 +1,2 @@
 cd src
-celery -A worker.worker worker --loglevel=info
+celery -A celery_worker.worker worker --loglevel=info -B

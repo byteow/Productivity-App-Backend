@@ -8,7 +8,7 @@ from db import (
 )
 from fastapi import HTTPException
 from .schemas import UpdateAnswersSchema
-from worker import generate_survey
+from celery_worker import generate_survey_task
 
 class Service:
     def __init__(self):
@@ -31,7 +31,7 @@ class Service:
             schema=None
         )
 
-        generate_survey.delay(user_id, survey.id)
+        generate_survey_task.delay(user_id, survey.id)
 
         return {
             "survey_id": survey.id,
