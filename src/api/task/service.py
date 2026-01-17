@@ -55,7 +55,11 @@ class Service:
     
 
     async def update_task(self, schema: UpdateTaskSchema, user_id: int, db: AsyncSession):
-        data = schema.model_dump(exclude_none=True, exclude={"task_id"})
+        data = schema.model_dump(
+            exclude_none=True, 
+            exclude={"task_id"}, 
+            include={'priority', 'status'}
+        )
         rowcount = await update_user_task(
             db,
             user_id=user_id,

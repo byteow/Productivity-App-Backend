@@ -9,7 +9,9 @@ from api import (
     task_router
 )
 from services import ErrorHandlingMiddleware
-from config import CORS_ORIGINS
+from redis.asyncio import from_url
+from config import CORS_ORIGINS, REDIS_URL
+from fastapi_limiter import FastAPILimiter
 
 app = FastAPI()
 app.add_middleware(
@@ -21,6 +23,11 @@ app.add_middleware(
 )
 
 app.add_middleware(ErrorHandlingMiddleware)
+
+@app.on_event("startup")
+async def startup():
+    r = from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
+    await FastAPILimiter.init(r)
 
 api_router = APIRouter(prefix="/api")
 

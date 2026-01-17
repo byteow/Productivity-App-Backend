@@ -30,7 +30,7 @@ class Service:
         }
 
     
-    def random_tip(self, lang: Language):
+    def _random_tip(self, lang: Language):
         return random.choice(self.tips[lang])
     
 
@@ -39,7 +39,7 @@ class Service:
         if not user:
             raise HTTPException(404, detail="User not found")
         
-        rt = lambda: self.random_tip(schema.lang)
+        rt = lambda: self._random_tip(schema.lang)
 
         if not user.streak:
             user.streak = await create_streak(
@@ -88,16 +88,9 @@ class Service:
     
 
     async def update_meta_info(self, schema: UpdateMetaInfoSchema, user_id: int, db: AsyncSession):
-        data_for_update = {}
-        data_for_update["birthday"] = schema.birthday
-
-        if schema.name:
-            data_for_update["name"] = schema.name
-        if schema.gender:
-            data_for_update["gender"] = schema.gender
-            
-        await update_user(db, id=user_id, **data_for_update)
-
+        data = schema.model_dump(exclude_none=True, include={'birthday', 'name', 'gender'})
+        data["birthday"] = schema.birthday
+        await update_user(db, id=user_id, **data)
         return { "message": "Profile successfully updated" }
     
 

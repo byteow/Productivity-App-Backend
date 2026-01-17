@@ -10,8 +10,6 @@ class CreateTaskSchema(BaseModel):
 
 class UpdateTaskSchema(BaseModel):
     task_id: int
-    category: Optional[str] = Field(None, max_length=255)
-    description: Optional[str] = Field(None, max_length=255)
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
 

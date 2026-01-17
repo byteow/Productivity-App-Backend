@@ -12,3 +12,4 @@ redis
 pydantic[email]
 user-agents
 websockets
+fastapi-limiter
