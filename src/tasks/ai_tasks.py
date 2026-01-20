@@ -1,27 +1,25 @@
-import asyncio
 import redis.asyncio as redis
 import json
-from config import (
-    REDIS_URL
-)
-from db import (
-    SurveyStatus,
-    update_survey,
-    get_engine
-)
+from config import REDIS_URL
+from services import ChatGPT
+from db import SurveyStatus, update_survey, get_engine
 
-questions = [
+"""questions = [
     {"question": "Сколько часов вы спали прошлой ночью?", "answer_type": "numeric"},
     {"question": "Как вы оцениваете свою продуктивность за неделю?", "answer_type": "scale-1-5"},
     {"question": "Какая личная активность дала наибольшую пользу вашему самочувствию?", "answer_type": "text"},
     {"question": "Сколько задач вы закрыли на прошлой неделе?", "answer_type": "numeric"},
     {"question": "Вы планируете новые цели на следующую неделю?", "answer_type": "single_choice"}
 ]
+"""
+
+client = ChatGPT()
 
 async def async_generate_survey(user_id: int, survey_id: int):
-    await asyncio.sleep(10)
-
-    # TODO: generate survey via ChatGPT
+    survey = await client.survey_generate()
+    if survey is None:
+        print("ChatGPT Response is None")
+        return
 
     _, AsyncSessionLocal = get_engine()
 
@@ -30,7 +28,7 @@ async def async_generate_survey(user_id: int, survey_id: int):
             session,
             survey_id=survey_id,
             status=SurveyStatus.PENDING,
-            schema=questions
+            schema=survey
         )
 
     r = redis.from_url(REDIS_URL)

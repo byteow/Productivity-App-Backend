@@ -26,3 +26,6 @@ EMAIL_SERVER_PORT = int(os.environ.get("EMAIL_SERVER_PORT"))
 
 # CORS
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS").split(",")
+
+# OpenAI
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")

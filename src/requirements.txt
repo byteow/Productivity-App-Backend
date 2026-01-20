@@ -13,3 +13,4 @@ pydantic[email]
 user-agents
 websockets
 fastapi-limiter
+openai
