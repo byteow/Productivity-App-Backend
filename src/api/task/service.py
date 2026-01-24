@@ -5,6 +5,8 @@ from db import (
     get_user_tasks,
     delete_user_task,
     update_user_task,
+    update_task_count_stat,
+    create_task_daily_stat,
     TaskStatus
 )
 from fastapi import HTTPException
@@ -60,14 +62,26 @@ class Service:
             exclude={"task_id"}, 
             include={'priority', 'status'}
         )
-        rowcount = await update_user_task(
+        task = await update_user_task(
             db,
             user_id=user_id,
             task_id=schema.task_id,
             **data
         )
-        if rowcount == 0:
+        if task is None:
             raise HTTPException(404, detail="Task not found")
+        status = data.get("status")
+        if status and not task.is_pinned:
+            is_increment = status == TaskStatus.COMPLETED.value
+            rowcount = await update_task_count_stat(
+                db,
+                is_increment,
+                user_id=user_id,
+                _datetime=task.created_at
+            )
+            if rowcount == 0:
+                await create_task_daily_stat(db, user_id=user_id, count=1)
+
         return {"message": "Task successfully updated"}
     
 

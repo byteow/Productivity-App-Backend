@@ -6,7 +6,8 @@ from api import (
     profile_router,
     survey_router,
     ws_router,
-    task_router
+    task_router,
+    analytics_router
 )
 from services import ErrorHandlingMiddleware
 from redis.asyncio import from_url
@@ -37,5 +38,6 @@ api_router.include_router(profile_router, tags=["Profile"])
 api_router.include_router(survey_router, tags=["Survey"])
 api_router.include_router(ws_router, tags=["WebSocket"])
 api_router.include_router(task_router, tags=["Task"])
+api_router.include_router(analytics_router, tags=["Analytics"])
 
 app.include_router(api_router)

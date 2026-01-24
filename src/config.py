@@ -29,3 +29,4 @@ CORS_ORIGINS = os.environ.get("CORS_ORIGINS").split(",")
 
 # OpenAI
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+OPENAI_PROXY = os.environ.get("OPENAI_PROXY")

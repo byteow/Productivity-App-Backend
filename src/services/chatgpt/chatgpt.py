@@ -1,10 +1,10 @@
 from openai import AsyncOpenAI
-from config import OPENAI_API_KEY
+from config import OPENAI_API_KEY, OPENAI_PROXY
 from typing import List
 
 class ChatGPT:
     def __init__(self):
-        self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+        self.client = AsyncOpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_PROXY)
 
     
     async def _base_request(self, messages: List[dict]):

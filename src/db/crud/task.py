@@ -62,13 +62,14 @@ async def update_user_task(
     user_id: int,
     task_id: int,
     **kwargs
-) -> int:
+) -> Task | None:
     query = update(Task)\
         .where(and_(Task.id == task_id, Task.user_id == user_id))\
-        .values(**kwargs)
+        .values(**kwargs)\
+        .returning(Task)
     result = await session.execute(query)
     await session.commit()
-    return result.rowcount
+    return result.scalar_one_or_none()
 
 async def delete_user_task(
     session: AsyncSession,

@@ -97,3 +97,21 @@ class Streak(Base):
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
 
     user = relationship("User", back_populates="streak")
+
+class TaskDailyStat(Base):
+    __tablename__ = "tasks_daily_stats"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    count = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=timestamp, index=True)
+    updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
+
+class PomodoroSessionDailyStat(Base):
+    __tablename__ = "pomodoro_sessions_daily_stats"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    count = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=timestamp, index=True)
+    updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
