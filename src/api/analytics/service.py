@@ -14,16 +14,18 @@ class Service:
     
     async def productivity(self, user_id: int, db: AsyncSession):
         tasks_stats = await get_weekly_stats(db, user_id=user_id)
-        maximum = max(tasks_stats)
-        if maximum == 0:
-            return { "productivity": [0] * 7 }
-        tasks_stats = tasks_stats + [0] * (7 - len(tasks_stats))
+        if len(tasks_stats) == 0:
+            return { "productivity": [] }
+        maximum = max(tasks_stats, key=lambda x: x["count"])["count"]
 
         return {
-            "productivity": [
-                round((stat / maximum) * 100, 0)
-                for stat in tasks_stats
-            ]
+            "productivity": list(map(
+                lambda stat: {
+                    "count": round((stat["count"] / maximum) * 100, 0),
+                    "weekday": stat["created_at"].date().weekday()
+                },
+                tasks_stats
+            ))
         }
     
 

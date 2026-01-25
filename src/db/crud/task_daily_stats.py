@@ -46,10 +46,10 @@ async def get_weekly_stats(
     session: AsyncSession,
     *,
     user_id: int
-) -> List[int]:
+) -> list[dict]:
     start_of_week, end_of_week = get_week_range()
 
-    query = select(TaskDailyStat.count)\
+    query = select(TaskDailyStat.count, TaskDailyStat.created_at)\
         .where(
             and_(
                 TaskDailyStat.user_id == user_id,
@@ -57,7 +57,7 @@ async def get_weekly_stats(
             )
         )
     result = await session.execute(query)
-    return result.scalars().all()
+    return [row._asdict() for row in result]
 
 async def get_tasks_total_stats(
     session: AsyncSession,
