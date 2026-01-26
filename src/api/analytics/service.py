@@ -16,12 +16,12 @@ class Service:
         tasks_stats = await get_weekly_stats(db, user_id=user_id)
         if len(tasks_stats) == 0:
             return { "productivity": [] }
-        maximum = max(tasks_stats, key=lambda x: x["count"])["count"]
+        maximum = max(tasks_stats, key=lambda x: x["points"])["points"]
 
         return {
             "productivity": list(map(
                 lambda stat: {
-                    "count": round((stat["count"] / maximum) * 100, 0),
+                    "value": round((stat["points"] / maximum) * 100, 0),
                     "weekday": stat["created_at"].date().weekday()
                 },
                 tasks_stats

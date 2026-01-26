@@ -7,7 +7,7 @@ from db import (
     update_today_survey
 )
 from fastapi import HTTPException
-from .schemas import UpdateAnswersSchema
+from .schemas import UpdateAnswersSchema, SurveyGenerateSchema
 from celery_worker import generate_survey_task
 
 class Service:
@@ -15,7 +15,7 @@ class Service:
         ...
 
 
-    async def generate_survey(self, user_id: int, db: AsyncSession):
+    async def generate_survey(self, schema: SurveyGenerateSchema, user_id: int, db: AsyncSession):
         today_survey = await get_today_survey(db, user_id=user_id)
         if today_survey:
             return {
@@ -31,7 +31,7 @@ class Service:
             schema=None
         )
 
-        generate_survey_task.delay(user_id, survey.id)
+        generate_survey_task.delay(user_id, survey.id, schema.lang)
 
         return {
             "survey_id": survey.id,

@@ -15,8 +15,8 @@ from db import SurveyStatus, update_survey, get_engine
 
 client = ChatGPT()
 
-async def async_generate_survey(user_id: int, survey_id: int):
-    survey = await client.survey_generate()
+async def async_generate_survey(user_id: int, survey_id: int, lang):
+    survey = await client.survey_generate(lang)
     if survey is None:
         print("ChatGPT Response is None")
         return

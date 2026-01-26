@@ -2,18 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, and_, cast, Date, func
 from db import TaskDailyStat
 from db.utils import get_week_range
-from typing import List
 from datetime import datetime, date
 
 async def create_task_daily_stat(
     session: AsyncSession,
     *,
     user_id: int,
-    count: int
+    count: int,
+    points: int
 ) -> TaskDailyStat:
     stat = TaskDailyStat(
         user_id=user_id,
-        count=count
+        count=count,
+        points=points
     )
     session.add(stat)
     await session.commit()
@@ -26,6 +27,7 @@ async def update_task_count_stat(
     is_increment: bool,
     *,
     user_id: int,
+    points: int,
     _datetime: datetime
 ) -> int:
     _date = _datetime.date()
@@ -36,7 +38,10 @@ async def update_task_count_stat(
                 cast(TaskDailyStat.created_at, Date) == _date
             )
         )\
-        .values(count=((TaskDailyStat.count + 1) if is_increment else (TaskDailyStat.count - 1)))
+        .values(
+            count=((TaskDailyStat.count + 1) if is_increment else (TaskDailyStat.count - 1)),
+            points=((TaskDailyStat.points + points) if is_increment else (TaskDailyStat.points - points))
+        )
     result = await session.execute(query)
     await session.commit()
 
@@ -49,7 +54,7 @@ async def get_weekly_stats(
 ) -> list[dict]:
     start_of_week, end_of_week = get_week_range()
 
-    query = select(TaskDailyStat.count, TaskDailyStat.created_at)\
+    query = select(TaskDailyStat.points, TaskDailyStat.created_at)\
         .where(
             and_(
                 TaskDailyStat.user_id == user_id,

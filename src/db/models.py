@@ -104,6 +104,7 @@ class TaskDailyStat(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     count = Column(Integer, nullable=False)
+    points = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), default=timestamp, index=True)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
 

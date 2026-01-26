@@ -1,6 +1,7 @@
 from openai import AsyncOpenAI
 from config import OPENAI_API_KEY, OPENAI_PROXY
 from typing import List
+import json
 
 class ChatGPT:
     def __init__(self):
@@ -15,16 +16,19 @@ class ChatGPT:
         )
     
 
-    async def survey_generate(self):
+    async def survey_generate(self, lang):
         system_instruction = (
-            "You are a professional productivity survey generator."
-            "Return ONLY a JSON object with the following structure:"
-            "[ { 'question': string, 'answer_type': 'numeric' | 'scale-1-5' | 'single_choice' | 'text' } ]"
-            "For 'numeric', use a number. For 'single_choice, use Yes/No. For 'scale-1-5' use a mark from 1 to 5. For 'text', use a text"
+            "ACT AS a professional productivity survey generator. "
+            "RETURN ONLY a valid JSON ARRAY containing EXACTLY 5 objects. "
+            "DO NOT include any introductory or explanatory text. "
+            "EACH OBJECT must have this strict schema: "
+            "{ 'question': string, 'answer_type': 'numeric' | 'scale-1-5' | 'single_choice' | 'text' }. "
+            "CONSTRAINTS: 'numeric' expects a number; 'single_choice' is strictly 'Yes' or 'No'; "
+            "'scale-1-5' is a rating from 1 to 5; 'text' is a free-form string."
         )
 
         response = await self._base_request(messages=[
             { "role": "system", "content": system_instruction },
-            { "role": "user", "content": 'Create a performance questionnaire that consists of exactly 5 questions.' }
+            { "role": "user", "content": f'Create a performance questionnaire that consists of exactly 5 questions. Use this language: {lang}' }
         ])
-        return response.choices[0].message.content
+        return json.loads(response.choices[0].message.content)

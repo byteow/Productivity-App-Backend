@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from .enums import TASK_POINTS
 from db import (
     get_user_tasks_count,
     create_task as new_task,
@@ -73,14 +74,16 @@ class Service:
         status = data.get("status")
         if status and not task.is_pinned:
             is_increment = status == TaskStatus.COMPLETED.value
+            points = TASK_POINTS[task.priority]
             rowcount = await update_task_count_stat(
                 db,
                 is_increment,
                 user_id=user_id,
-                _datetime=task.created_at
+                _datetime=task.created_at,
+                points=points
             )
             if rowcount == 0:
-                await create_task_daily_stat(db, user_id=user_id, count=1)
+                await create_task_daily_stat(db, user_id=user_id, count=1, points=points)
 
         return {"message": "Task successfully updated"}
     

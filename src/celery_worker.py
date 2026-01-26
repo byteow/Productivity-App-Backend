@@ -28,8 +28,8 @@ def clean_old_tasks_task():
     return asyncio.run(async_clean_old_tasks())
 
 @worker.task(name="generate_survey", rate_limit="40/m")
-def generate_survey_task(user_id: int, survey_id: int):
-    return asyncio.run(async_generate_survey(user_id, survey_id))
+def generate_survey_task(user_id: int, survey_id: int, lang):
+    return asyncio.run(async_generate_survey(user_id, survey_id, lang))
 
 @worker.task(name="send_code", rate_limit="20/m")
 def send_code_task(email: str, code: int):
