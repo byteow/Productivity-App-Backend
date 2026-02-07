@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import (
     update_user,
     get_user_by_id,
-    update_user_streak,
+    get_user_monthly_streaks,
     create_streak,
     get_user_by_email,
     Service as CodeService
@@ -15,7 +15,7 @@ from .schemas import (
 )
 from fastapi import HTTPException
 from services import get_otp_manager, hash_password
-from datetime import date, timedelta
+from datetime import date
 from .enums import Language
 import os
 import json
@@ -39,39 +39,20 @@ class Service:
         if not user:
             raise HTTPException(404, detail="User not found")
         
-        rt = lambda: self._random_tip(schema.lang)
-
-        if not user.streak:
-            user.streak = await create_streak(
-                db,
-                user_id=user_id,
-                streak_days=1,
-                is_active=True,
-                penalty_days=0,
-                day_tip=rt()
-            )
+        streaks = await get_user_monthly_streaks(db, user_id=user_id)
         today = date.today()
         
-        if user.streak and user.streak.updated_at.date() != today:
-            kwargs = {}
-            yesterday = today - timedelta(days=1)
-            update_date = user.streak.updated_at.date()
-
-            if user.streak.is_active and update_date == yesterday:
-                kwargs = { "streak_days": user.streak.streak_days + 1 }
-            elif user.streak.is_active and update_date < yesterday:
-                kwargs = { "is_active": False, "streak_days": 0 }
-            elif not user.streak.is_active and update_date == yesterday:
-                penalty_days = user.streak.penalty_days + 1
-                kwargs = { "is_active": True, "penalty_days": 0 , "streak_days": 1 } if penalty_days >= 3 else { "penalty_days": penalty_days }
-            elif not user.streak.is_active and update_date < yesterday:
-                kwargs = { "penalty_days": 0 }
-            if kwargs:
-                kwargs["day_tip"] = rt()
-                await update_user_streak(db, user_id=user_id, **kwargs)
-                for key, value in kwargs.items():
-                    setattr(user.streak, key, value)
-
+        day_tip = None
+        if not len(streaks) or streaks[-1].created_at.date() != today:
+            day_tip = self._random_tip(schema.lang)
+            streaks.append(await create_streak(
+                db,
+                user_id=user_id,
+                day_tip=day_tip
+            ))
+        else:
+            day_tip = streaks[-1].day_tip
+        
         return {
             "id": user.id,
             "name": user.name,
@@ -79,10 +60,8 @@ class Service:
             "gender": user.gender,
             "birthday": user.birthday,
             "streak": {
-                "is_active": user.streak.is_active,
-                "streak_days": user.streak.streak_days,
-                "penalty_days": user.streak.penalty_days,
-                "day_tip": user.streak.day_tip
+                "days": [day.created_at.date().day for day in streaks],
+                "day_tip": day_tip
             }
         }
     
@@ -120,3 +99,26 @@ class Service:
         await update_user(db, id=user_id, password=new_pass_hash)
 
         return { "message": "Password successfully updated" }
+    
+'''
+        if user.streak and user.streak.updated_at.date() != today:
+        kwargs = {}
+        yesterday = today - timedelta(days=1)
+        update_date = user.streak.updated_at.date()
+
+        if user.streak.is_active and update_date == yesterday:
+            kwargs = { "streak_days": user.streak.streak_days + 1 }
+        elif user.streak.is_active and update_date < yesterday:
+            kwargs = { "is_active": False, "streak_days": 0 }
+        elif not user.streak.is_active and update_date == yesterday:
+            penalty_days = user.streak.penalty_days + 1
+            kwargs = { "is_active": True, "penalty_days": 0 , "streak_days": 1 } if penalty_days >= 3 else { "penalty_days": penalty_days }
+        elif not user.streak.is_active and update_date < yesterday:
+            kwargs = { "penalty_days": 0 }
+        if kwargs:
+            kwargs["day_tip"] = rt()
+            await update_user_streak(db, user_id=user_id, **kwargs)
+            for key, value in kwargs.items():
+                setattr(user.streak, key, value) 
+        
+'''

@@ -34,8 +34,6 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
 
-    streak = relationship("Streak", back_populates="user", uselist=False)
-
 class LoginSession(Base):
     __tablename__ = "login_sessions"
 
@@ -88,15 +86,10 @@ class Streak(Base):
     __tablename__ = "streaks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
-    streak_days = Column(Integer, nullable=False)
-    is_active = Column(Boolean, nullable=False)
-    penalty_days = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=False, index=True)
     day_tip = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=timestamp)
     updated_at = Column(DateTime(timezone=True), default=timestamp, onupdate=timestamp)
-
-    user = relationship("User", back_populates="streak")
 
 class TaskDailyStat(Base):
     __tablename__ = "tasks_daily_stats"

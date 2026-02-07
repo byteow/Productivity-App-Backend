@@ -47,7 +47,6 @@ async def get_user_by_id(
     id: int
 ) -> User | None:
     query = select(User)\
-            .options(joinedload(User.streak))\
             .where(User.id == id)
     result = await session.execute(query)
     return result.unique().scalars().first()
