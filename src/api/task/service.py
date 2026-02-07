@@ -11,8 +11,9 @@ from db import (
     TaskStatus
 )
 from fastapi import HTTPException
-from .constants import MAX_PINNED_TASKS_COUNT, MAX_TASKS_COUNT
+from .constants import MAX_PINNED_TASKS_COUNT, MAX_TASKS_COUNT, DAILY_TASK_EXP
 from .schemas import CreateTaskSchema, UpdateTaskSchema, DeleteTaskSchema
+from datetime import datetime, timezone
 
 class Service:
     def __init__(self):
@@ -43,6 +44,8 @@ class Service:
 
     async def get_tasks_list(self, user_id: int, db: AsyncSession):
         tasks = await get_user_tasks(db, user_id=user_id)
+        now = datetime.now(timezone.utc)
+
         return {
             "tasks": [
                 {
@@ -51,7 +54,8 @@ class Service:
                     "description": task.description,
                     "status": task.status,
                     "priority": task.priority,
-                    "is_pinned": task.is_pinned
+                    "is_pinned": task.is_pinned,
+                    "deadline_hours": None if task.is_pinned else DAILY_TASK_EXP - int((now - task.created_at.replace(tzinfo=timezone.utc)).total_seconds() / 3600)
                 } for task in tasks
             ]
         }

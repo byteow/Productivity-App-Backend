@@ -13,6 +13,7 @@ from db import SurveyStatus, update_survey, get_engine
 ]
 """
 
+redis_client = redis.from_url(REDIS_URL)
 client = ChatGPT()
 
 async def async_generate_survey(user_id: int, survey_id: int, lang):
@@ -31,8 +32,5 @@ async def async_generate_survey(user_id: int, survey_id: int, lang):
             schema=survey
         )
 
-    r = redis.from_url(REDIS_URL)
-
     notification = {"type": "survey_generated"}
-    await r.publish(f"user_event_{user_id}", json.dumps(notification))
-    await r.aclose()
+    await redis_client.publish(f"user_event_{user_id}", json.dumps(notification))
