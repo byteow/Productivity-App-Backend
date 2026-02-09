@@ -24,14 +24,35 @@ import random
 class Service:
     def __init__(self):
         self.otp_manager = get_otp_manager()
-        self.tips = {
-            Language.RU: json.loads(open(os.path.join('tips', 'ru_tips.json')).read()),
-            Language.EN: json.loads(open(os.path.join('tips', 'en_tips.json')).read())
+        self.tips = self._load_tips()
+
+
+    def _load_tips(self):
+        list_ru = json.loads(open(os.path.join('tips', 'ru_tips.json')).read())
+        list_en = json.loads(open(os.path.join('tips', 'en_tips.json')).read())
+        return {
+            Language.RU: {
+                "tips": list_ru,
+                "indexes": [index for index, _ in enumerate(list_ru)]
+            },
+            Language.EN: {
+                "tips": list_en,
+                "indexes": [index for index, _ in enumerate(list_en)]
+            }
         }
 
     
     def _random_tip(self, lang: Language):
-        return random.choice(self.tips[lang])
+        tips_list = self.tips[lang]
+        random_index = random.choice(tips_list["indexes"])
+        return tips_list["tips"][random_index], random_index
+    
+    
+    def _get_tip_by_index(self, lang: Language, index: int):
+        try:
+            return self.tips[lang]["tips"][index]
+        except Exception:
+            return None
     
 
     async def me(self, schema: GetMyProfileSchema, user_id: int, db: AsyncSession):
@@ -44,14 +65,15 @@ class Service:
         
         day_tip = None
         if not len(streaks) or streaks[-1].created_at.date() != today:
-            day_tip = self._random_tip(schema.lang)
+            day_tip_text, day_tip_index = self._random_tip(schema.lang)
             streaks.append(await create_streak(
                 db,
                 user_id=user_id,
-                day_tip=day_tip
+                day_tip_index=day_tip_index
             ))
+            day_tip = day_tip_text
         else:
-            day_tip = streaks[-1].day_tip
+            day_tip = self._get_tip_by_index(schema.lang, streaks[-1].day_tip_index)
         
         return {
             "id": user.id,

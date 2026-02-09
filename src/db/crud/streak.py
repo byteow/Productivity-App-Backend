@@ -8,11 +8,11 @@ async def create_streak(
     session: AsyncSession,
     *,
     user_id: int,
-    day_tip: str
+    day_tip_index: int
 ) -> Streak:
     streak = Streak(
         user_id=user_id,
-        day_tip=day_tip
+        day_tip_index=day_tip_index
     )
     session.add(streak)
     await session.commit()
