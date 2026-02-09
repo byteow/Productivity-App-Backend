@@ -17,6 +17,8 @@ class Service:
         if len(tasks_stats) == 0:
             return { "productivity": [] }
         maximum = max(tasks_stats, key=lambda x: x["points"])["points"]
+        if maximum == 0:
+            return { "productivity": [] }
 
         return {
             "productivity": list(map(
